@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
 
-function App(){
+function App() {
 
   const [products,setProducts]=useState([]);
+  const [cart,setCart]=useState([]);
+
   const [name,setName]=useState("");
   const [price,setPrice]=useState("");
+  const [image,setImage]=useState("");
   const [description,setDescription]=useState("");
-  const [cart,setCart]=useState([]);
 
   useEffect(()=>{
     fetchProducts();
@@ -26,6 +28,11 @@ function App(){
 
   const addProduct=async()=>{
 
+    if(!name || !price || !description){
+      alert("Please fill all fields");
+      return;
+    }
+
     try{
 
       await axios.post(
@@ -33,28 +40,37 @@ function App(){
         {
           name,
           price,
-          image:"",
+          image,
           description
         }
       );
 
-      alert("Product Added");
+      alert("Product Added Successfully");
 
       setName("");
       setPrice("");
+      setImage("");
       setDescription("");
 
       fetchProducts();
 
-    }
-    catch(error){
+    }catch(error){
       console.log(error);
     }
-
   };
 
   const addToCart=(product)=>{
     setCart([...cart,product]);
+  };
+
+  const removeFromCart=(indexToRemove)=>{
+    setCart(
+      cart.filter((item,index)=>index!==indexToRemove)
+    );
+  };
+
+  const clearCart=()=>{
+    setCart([]);
   };
 
   const totalPrice=cart.reduce(
@@ -63,92 +79,159 @@ function App(){
   );
 
   return(
-    <div className="container">
+    <div>
 
-      <h1 className="title">
-        CodeAlpha Ecommerce Store
-      </h1>
+      <nav className="navbar">
+        <h2>🛒 CodeAlpha Store</h2>
 
-      <h2>
-        Cart Items: {cart.length}
-      </h2>
+        <div className="cart-badge">
+          Cart: {cart.length}
+        </div>
+      </nav>
 
-      <div>
+      <div className="main-layout">
 
-        <input
-          type="text"
-          placeholder="Product Name"
-          value={name}
-          onChange={(e)=>setName(e.target.value)}
-        />
+        <div className="left-section">
 
-        <br /><br />
+          <div className="form-card">
 
-        <input
-          type="number"
-          placeholder="Price"
-          value={price}
-          onChange={(e)=>setPrice(e.target.value)}
-        />
+            <h2>Add Product</h2>
 
-        <br /><br />
+            <input
+              type="text"
+              placeholder="Product Name"
+              value={name}
+              onChange={(e)=>setName(e.target.value)}
+            />
 
-        <input
-          type="text"
-          placeholder="Description"
-          value={description}
-          onChange={(e)=>setDescription(e.target.value)}
-        />
+            <input
+              type="number"
+              placeholder="Price"
+              value={price}
+              onChange={(e)=>setPrice(e.target.value)}
+            />
 
-        <br /><br />
+            <input
+              type="text"
+              placeholder="Image URL"
+              value={image}
+              onChange={(e)=>setImage(e.target.value)}
+            />
 
-        <button onClick={addProduct}>
-          Add Product
-        </button>
+            <textarea
+              placeholder="Description"
+              value={description}
+              onChange={(e)=>setDescription(e.target.value)}
+            />
 
-      </div>
-
-      <br />
-
-      <div className="products">
-
-        {products.map((product)=>(
-          <div className="card" key={product._id}>
-
-            <h2>{product.name}</h2>
-
-            <p className="price">
-              ₹{product.price}
-            </p>
-
-            <p>
-              {product.description}
-            </p>
-
-            <button onClick={()=>addToCart(product)}>
-              Add To Cart
+            <button
+              className="add-btn"
+              onClick={addProduct}
+            >
+              Add Product
             </button>
 
           </div>
-        ))}
+
+          <h2 className="section-title">
+            Products
+          </h2>
+
+          <div className="products">
+
+            {products.map((product)=>(
+
+              <div className="card" key={product._id}>
+
+                <img
+                 src={
+                  product.image
+                   ? product.image
+                    : "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500"
+                 }
+                 alt={product.name}
+               />
+
+                <h3>{product.name}</h3>
+
+                <p className="price">
+                  ₹{product.price}
+                </p>
+
+                <p>
+                  {product.description}
+                </p>
+
+                <button
+                  className="cart-btn"
+                  onClick={()=>addToCart(product)}
+                >
+                  Add To Cart
+                </button>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        </div>
+
+        <div className="cart-section">
+
+          <h2>Shopping Cart</h2>
+
+          {cart.length===0 ? (
+            <p>Cart is Empty</p>
+          ) : (
+            <>
+              {cart.map((item,index)=>(
+                <div
+                  className="cart-item"
+                  key={index}
+                >
+
+                  <span>
+                    {item.name}
+                  </span>
+
+                  <button
+                    className="remove-btn"
+                    onClick={()=>removeFromCart(index)}
+                  >
+                    Remove
+                  </button>
+
+                </div>
+              ))}
+
+              <h3>
+                Total: ₹{totalPrice}
+              </h3>
+
+              <button
+                className="clear-btn"
+                onClick={clearCart}
+              >
+                Clear Cart
+              </button>
+
+              <button
+               className="order-btn"
+               onClick={()=>{
+                 alert("Order Placed Successfully!");
+                 setCart([]);
+               }}
+             >
+               Place Order
+             </button>
+
+            </>
+          )}
+
+        </div>
 
       </div>
-
-      <br />
-
-      <h2>Shopping Cart</h2>
-
-      {cart.map((item,index)=>(
-        <div key={index}>
-          <p>
-            {item.name} - ₹{item.price}
-          </p>
-        </div>
-      ))}
-
-      <h2>
-        Total Price: ₹{totalPrice}
-      </h2>
 
     </div>
   );

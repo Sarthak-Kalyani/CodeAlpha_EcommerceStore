@@ -22,19 +22,6 @@ app.get("/",(req,res)=>{
     res.send("Ecommerce Backend Running");
 });
 
-app.get("/add-product",async(req,res)=>{
-    const product=new Product({
-        name:"iPhone 16",
-        price:79999,
-        image:"iphone.jpg",
-        description:"Apple smartphone"
-    });
-
-    await product.save();
-
-    res.send("Product Added");
-});
-
 app.get("/products",async(req,res)=>{
     try{
         const products=await Product.find();
@@ -47,20 +34,34 @@ app.get("/products",async(req,res)=>{
 
 app.post("/add-product",async(req,res)=>{
 
-    const {name,price,image,description}=req.body;
+    try{
 
-    const product=new Product({
-        name,
-        price,
-        image,
-        description
-    });
+        const {name,price,image,description}=req.body;
 
-    await product.save();
+        const product=new Product({
+            name,
+            price,
+            image,
+            description
+        });
 
-    res.json({
-        message:"Product Added Successfully"
-    });
+        await product.save();
+
+        res.json({
+            success:true,
+            message:"Product Added Successfully"
+        });
+
+    }
+    catch(error){
+
+        res.status(500).json({
+            success:false,
+            message:error.message
+        });
+
+    }
+
 });
 
 app.listen(process.env.PORT,()=>{
