@@ -8,6 +8,7 @@ function App(){
   const [name,setName]=useState("");
   const [price,setPrice]=useState("");
   const [description,setDescription]=useState("");
+  const [cart,setCart]=useState([]);
 
   useEffect(()=>{
     fetchProducts();
@@ -52,12 +53,25 @@ function App(){
 
   };
 
+  const addToCart=(product)=>{
+    setCart([...cart,product]);
+  };
+
+  const totalPrice=cart.reduce(
+    (total,item)=>total+Number(item.price),
+    0
+  );
+
   return(
     <div className="container">
 
       <h1 className="title">
         CodeAlpha Ecommerce Store
       </h1>
+
+      <h2>
+        Cart Items: {cart.length}
+      </h2>
 
       <div>
 
@@ -111,10 +125,30 @@ function App(){
               {product.description}
             </p>
 
+            <button onClick={()=>addToCart(product)}>
+              Add To Cart
+            </button>
+
           </div>
         ))}
 
       </div>
+
+      <br />
+
+      <h2>Shopping Cart</h2>
+
+      {cart.map((item,index)=>(
+        <div key={index}>
+          <p>
+            {item.name} - ₹{item.price}
+          </p>
+        </div>
+      ))}
+
+      <h2>
+        Total Price: ₹{totalPrice}
+      </h2>
 
     </div>
   );
