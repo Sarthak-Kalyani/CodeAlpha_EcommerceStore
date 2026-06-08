@@ -1,22 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect,useState } from "react";
 import axios from "axios";
 import "./App.css";
 
-function App() {
+function App(){
 
   const [products,setProducts]=useState([]);
   const [cart,setCart]=useState([]);
 
-  const [name,setName]=useState("");
-  const [price,setPrice]=useState("");
-  const [image,setImage]=useState("");
-  const [description,setDescription]=useState("");
-
   useEffect(()=>{
-    fetchProducts();
-  },[]);
-
-  const fetchProducts=()=>{
     axios.get("http://localhost:5000/products")
     .then((response)=>{
       setProducts(response.data);
@@ -24,40 +15,7 @@ function App() {
     .catch((error)=>{
       console.log(error);
     });
-  };
-
-  const addProduct=async()=>{
-
-    if(!name || !price || !description){
-      alert("Please fill all fields");
-      return;
-    }
-
-    try{
-
-      await axios.post(
-        "http://localhost:5000/add-product",
-        {
-          name,
-          price,
-          image,
-          description
-        }
-      );
-
-      alert("Product Added Successfully");
-
-      setName("");
-      setPrice("");
-      setImage("");
-      setDescription("");
-
-      fetchProducts();
-
-    }catch(error){
-      console.log(error);
-    }
-  };
+  },[]);
 
   const addToCart=(product)=>{
     setCart([...cart,product]);
@@ -65,12 +23,10 @@ function App() {
 
   const removeFromCart=(indexToRemove)=>{
     setCart(
-      cart.filter((item,index)=>index!==indexToRemove)
+      cart.filter(
+        (item,index)=>index!==indexToRemove
+      )
     );
-  };
-
-  const clearCart=()=>{
-    setCart([]);
   };
 
   const totalPrice=cart.reduce(
@@ -82,158 +38,151 @@ function App() {
     <div>
 
       <nav className="navbar">
-        <h2>🛒 CodeAlpha Store</h2>
 
-        <div className="cart-badge">
+        <h1>
+          🛒 CodeAlpha Store
+        </h1>
+
+        <div className="cart-count">
           Cart: {cart.length}
         </div>
+
       </nav>
 
-      <div className="main-layout">
+      <div className="hero">
 
-        <div className="left-section">
+        <h1>
+          🔥 Summer Sale 2026
+        </h1>
 
-          <div className="form-card">
+        <p>
+          Premium Tech Products
+        </p>
 
-            <h2>Add Product</h2>
+      </div>
 
-            <input
-              type="text"
-              placeholder="Product Name"
-              value={name}
-              onChange={(e)=>setName(e.target.value)}
-            />
+      <div className="all-products">
 
-            <input
-              type="number"
-              placeholder="Price"
-              value={price}
-              onChange={(e)=>setPrice(e.target.value)}
-            />
+        <h2>
+          Products
+        </h2>
 
-            <input
-              type="text"
-              placeholder="Image URL"
-              value={image}
-              onChange={(e)=>setImage(e.target.value)}
-            />
+        <div className="products">
 
-            <textarea
-              placeholder="Description"
-              value={description}
-              onChange={(e)=>setDescription(e.target.value)}
-            />
+          {products.map((product)=>(
 
-            <button
-              className="add-btn"
-              onClick={addProduct}
+            <div
+              className="card"
+              key={product._id}
             >
-              Add Product
-            </button>
 
-          </div>
-
-          <h2 className="section-title">
-            Products
-          </h2>
-
-          <div className="products">
-
-            {products.map((product)=>(
-
-              <div className="card" key={product._id}>
-
-                <img
-                 src={
+              <img
+                src={
                   product.image
-                   ? product.image
-                    : "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500"
-                 }
-                 alt={product.name}
-               />
+                  ? product.image
+                  : "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500"
+                }
+                alt={product.name}
+              />
 
-                <h3>{product.name}</h3>
+              <div className="rating">
+                ⭐ 4.8
+              </div>
 
-                <p className="price">
-                  ₹{product.price}
-                </p>
+              <h3>
+                {product.name}
+              </h3>
 
-                <p>
-                  {product.description}
-                </p>
+              <p className="price">
+                ₹{product.price}
+              </p>
+
+              <p>
+                {product.description}
+              </p>
+
+              <button
+                className="cart-btn"
+                onClick={()=>
+                  addToCart(product)
+                }
+              >
+                Add To Cart
+              </button>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      </div>
+
+      <div className="cart-section">
+
+        <h2>
+          🛒 Shopping Cart
+        </h2>
+
+        {cart.length===0 ? (
+
+          <p> 🛒 Your cart is empty. Add some awesome products! </p>
+
+        ) : (
+
+          <>
+            {cart.map((item,index)=>(
+
+              <div
+                className="cart-item"
+                key={index}
+              >
+
+                <span>
+                  {item.name}
+                </span>
 
                 <button
-                  className="cart-btn"
-                  onClick={()=>addToCart(product)}
+                  className="remove-btn"
+                  onClick={()=>
+                    removeFromCart(index)
+                  }
                 >
-                  Add To Cart
+                  Remove
                 </button>
 
               </div>
 
             ))}
 
-          </div>
+            <h3>
+              Total: ₹{totalPrice}
+            </h3>
 
-        </div>
+            <button
+              className="order-btn"
+              onClick={()=>{
+                alert("🎉 Order Placed Successfully!");
+                setCart([]);
+              }}
+            >
+              Place Order
+            </button>
 
-        <div className="cart-section">
+          </>
 
-          <h2>Shopping Cart</h2>
-
-          {cart.length===0 ? (
-            <p>Cart is Empty</p>
-          ) : (
-            <>
-              {cart.map((item,index)=>(
-                <div
-                  className="cart-item"
-                  key={index}
-                >
-
-                  <span>
-                    {item.name}
-                  </span>
-
-                  <button
-                    className="remove-btn"
-                    onClick={()=>removeFromCart(index)}
-                  >
-                    Remove
-                  </button>
-
-                </div>
-              ))}
-
-              <h3>
-                Total: ₹{totalPrice}
-              </h3>
-
-              <button
-                className="clear-btn"
-                onClick={clearCart}
-              >
-                Clear Cart
-              </button>
-
-              <button
-               className="order-btn"
-               onClick={()=>{
-                 alert("Order Placed Successfully!");
-                 setCart([]);
-               }}
-             >
-               Place Order
-             </button>
-
-            </>
-          )}
-
-        </div>
+        )}
 
       </div>
 
+      <footer className="footer"> 
+        <h3>🛒 CodeAlpha Store</h3> 
+        <p>Premium Ecommerce Experience</p> 
+        <p>Built by Sarthak Kalyani</p> 
+        </footer>
+
     </div>
+
   );
 }
 
